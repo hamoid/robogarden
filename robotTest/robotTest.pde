@@ -39,6 +39,10 @@ void draw() {
   r.update();
   r.draw();
 
+  if (r.mode == Robot.MOVING) {
+    darkenRobotTracks();
+  }
+
   plants.update();
   plants.draw();
 
@@ -47,6 +51,22 @@ void draw() {
   camera();
   hint(DISABLE_DEPTH_TEST);
   r.emo.draw();
+}
+void darkenRobotTracks() {
+  tracks.loadPixels();
+  for (int i=0; i<30; i++) {
+    int x = (int)((r.pos.x / width) * tracks.width + random(-5, 5));
+    int y = (int)((r.pos.y / height) * tracks.height + random(-5, 5));
+
+    int which = x + y * tracks.width;
+    if (which < 0) which = 0;
+    if (which > tracks.pixels.length) which = tracks.pixels.length - 1;
+
+    int c = tracks.pixels[which];
+    c = color(hue(c), saturation(c), brightness(c) - 20);
+    tracks.pixels[which] = c;  
+  }
+  tracks.updatePixels();
 }
 void drawGround() {
   beginShape();
