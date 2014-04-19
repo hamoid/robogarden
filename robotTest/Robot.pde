@@ -2,6 +2,7 @@ class Robot {
   PVector pos, tpos;
   float sz, dir, speed;
   color c;
+  Emo emo;
 
   Robot(float x, float y) {
     pos = new PVector(x, y);
@@ -10,10 +11,11 @@ class Robot {
     this.sz = 40;
     this.speed = 5;
     c = color(random(255), 200, 100);
+    
+    emo = new Emo();
   }
 
   void draw() {
-    rectMode(CENTER);
     noStroke();
     
     pushMatrix();
@@ -24,6 +26,8 @@ class Robot {
     fill(c);
 
     box(1.0, 0.8, 0.1);
+    
+    emo.setPos(screenX(0, 0, 0), screenY(0, 0, 0));
 
     pushMatrix();
     translate(0, 0.5);
@@ -75,6 +79,7 @@ class Robot {
   void setRandomTarget() {
     tpos.x = random(width);
     tpos.y = random(height);
+    emo.load();
   }
 }
 
