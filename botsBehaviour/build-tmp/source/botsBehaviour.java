@@ -30,7 +30,7 @@ public void setup() {
 
 public void draw() {
   background(255);
-  camera(width/2.0f, height * 2, (height/4.0f) / tan(PI*30.0f / 180.0f), width/2.0f, height/2.0f, 0, 0, 1, 0); 
+  // camera(width/2.0, height * 2, (height/4.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0); 
 
 
   // predators.birth();
@@ -111,14 +111,28 @@ class BombKiller extends Killer {
     ellipse(location.x, location.y, bombRadius, bombRadius);
   }
 }
+// okay, let's have our dear robots be enraged when they are surrounded by trees
+
 class Killer extends Walker {
   float hunting;
   float killing;
+
+  float senseRadius;
+  int tolerance;
+  float rage;
 
   Killer(PVector l) {
     super(l);
     hunting = 50.0f;
     killing = 10.0f;
+    senseRadius = random(36.0f, 48.0f);
+    tolerance = PApplet.parseInt(random(4, 12));
+    rage = 0.0f;
+  }
+
+  public void run() {
+    super.run();
+    mood();
   }
 
   public void look() {
@@ -128,18 +142,27 @@ class Killer extends Walker {
     }
 
     int index = -1;
-    float distance = hunting;
+    float nearest = hunting;
+    int counter = 0;
 
     for (int i = preys.particles.size()-1; i >= 0; i--) {
       Particle prey = preys.particles.get(i);
-      if (location.dist(prey.location) < distance) {
+      float distance = location.dist(prey.location);
+      if (distance < nearest) {
         index = i;
-        distance = location.dist(prey.location);
+        nearest = distance;
       }
+
+      if (distance < senseRadius)
+        counter++;
+    }
+
+    if (counter > tolerance) {
+      rage += random(80, 120);
     }
 
     if (!isAvoiding) {
-      if (index != -1 && distance < killing) {
+      if (index != -1 && nearest < killing) {
         kill(index);
       } else if (index != -1) {
         hunt(index);
@@ -170,6 +193,21 @@ class Killer extends Walker {
 
   public void normal() {
     speed = 5;
+  }
+
+  public void mood() {
+    if (rage < 0.1f) {
+      rage = 0;
+      rotationRate = 0.05f;
+      speed = 5.0f;
+      c = color(0, 200, 100);
+    } else {
+      rage -= 1.0f;
+      rotationRate = 0.2f;
+      speed *= 1.1f;
+      speed = min(speed, random(8.4f, 9.2f));
+      c = color(100, 255, 125);
+    }
   }
 }
 class Particle {
@@ -305,11 +343,11 @@ class Predators extends ParticleSystem {
     PVector location = new PVector(random(0, width), random(0, height));
     Particle p;
 
-    if (random(0, 1) < 0.5f)
-      p = new AggroKiller(location);
-    // else if (random(0, 1) < 0.22)
-    //   p = new BombKiller(location);
-    else
+    // if (random(0, 1) < 0.5)
+    //   p = new AggroKiller(location);
+    // // else if (random(0, 1) < 0.22)
+    // //   p = new BombKiller(location);
+    // else
       p = new Killer(location);
     particles.add(p);
   }

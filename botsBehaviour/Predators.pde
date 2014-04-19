@@ -15,11 +15,11 @@ class Predators extends ParticleSystem {
     PVector location = new PVector(random(0, width), random(0, height));
     Particle p;
 
-    if (random(0, 1) < 0.5)
-      p = new AggroKiller(location);
-    // else if (random(0, 1) < 0.22)
-    //   p = new BombKiller(location);
-    else
+    // if (random(0, 1) < 0.5)
+    //   p = new AggroKiller(location);
+    // // else if (random(0, 1) < 0.22)
+    // //   p = new BombKiller(location);
+    // else
       p = new Killer(location);
     particles.add(p);
   }
