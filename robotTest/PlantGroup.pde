@@ -49,7 +49,7 @@ class PlantGroup {
           for (int p2=0; p2<vegetation.size(); p2++) 
           {
             Plant plant2=vegetation.get(p2);
-            if (dist(sx, sy, plant2.x, plant2.y) < plant2.size || outside_screen(sx, sy))
+            if (dist(sx, sy, plant2.x, plant2.y) < plant2.size_max || outside_screen(sx, sy))
             {
               does_not_overlap = false;
               break;
