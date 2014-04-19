@@ -30,6 +30,14 @@ void draw()
   }
 }
 
+boolean outside_screen(float x, float y) {
+  if (x<0 || x>width || y<0 || y>height)
+  {
+    return true;
+  }
+  return false;
+}
+
 void update_vegetation() {
   for (int p=0; p<vegetation.size(); p++)
   {
@@ -49,7 +57,7 @@ void update_vegetation() {
         for (int p2=0; p2<vegetation.size(); p2++) 
         {
           Plant plant2=vegetation.get(p2);
-          if (dist(sx, sy, plant2.x, plant2.y) < plant2.size)
+          if (dist(sx, sy, plant2.x, plant2.y) < plant2.size || outside_screen(sx, sy))
           {
             does_not_overlap = false;
             break;

@@ -15,7 +15,7 @@ class Plant
     this.time_born = millis()/1000.0;
     this.age = 0.0;
     this.size_min = 10;
-    this.size_max = 80;
+    this.size_max = 30;
     this.growth_rate = 20.0;
     this.size = size_min;
     this.fully_grown = false;
@@ -58,7 +58,7 @@ class Plant
 
   void randomize_growth() {
     this.size_max = (5.0 + randomGaussian())/6.0 * 30.0;
-    this.growth_rate = (2.0 + randomGaussian())/(2.0 + 1.0) * 20.0;
+    this.growth_rate = (5.0 + randomGaussian())/(5.0 + 1.0) * 20.0;
   }
 }
 
