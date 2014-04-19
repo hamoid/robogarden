@@ -65,8 +65,8 @@ class Plant
 
 
   void randomize_growth() {
-    float exponential_factor = exp( - this.generation * 0.1 );
-    this.size_max = (5.0 + randomGaussian())/6.0 * 40.0 * exponential_factor;
+    float exponential_factor = exp( - this.generation * 0.2 );
+    this.size_max = (5.0 + randomGaussian())/6.0 * 30.0 * exponential_factor;
     this.growth_rate = (5.0 + randomGaussian())/(5.0 + 1.0) * 20.0;
 
     if (random(1.0) > exponential_factor) 

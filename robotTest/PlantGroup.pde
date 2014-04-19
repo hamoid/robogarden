@@ -2,14 +2,18 @@ class PlantGroup {
 
   ArrayList<Plant> vegetation;
 
-  PlantGroup(float x, float y) 
+  PlantGroup() 
   {
     vegetation = new ArrayList<Plant>();
-    Plant root = new Plant(x, y, 0);
-    //root.randomize_growth();
-    vegetation.add(root);
   }
 
+  void seed_plant(float x, float y)
+  {
+    Plant root = new Plant(x, y, 0);
+    root.randomize_growth();
+    vegetation.add(root);
+  }
+  
   void draw()
   {
     for (int p=0; p<vegetation.size(); p++)
