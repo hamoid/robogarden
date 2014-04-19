@@ -6,6 +6,7 @@ class Plant
   float size, size_min, size_max;
   float growth_rate;
   float time_born;
+  boolean fully_grown;
 
   public Plant(float x, float y)
   {
@@ -17,10 +18,19 @@ class Plant
     this.size_max = 80;
     this.growth_rate = 20.0;
     this.size = size_min;
+    this.fully_grown = false;
   }
 
   void draw()
   {
+    if (this.fully_grown)
+    {
+      fill(128, 200, 0);
+    }
+    else
+    {
+      fill(100, 255, 30);
+    }
     ellipse(this.x, this.y, this.size, this.size);
   }
 
@@ -36,18 +46,18 @@ class Plant
     if (this.size > this.size_max) 
     {
       this.size = this.size_max;
+      this.fully_grown = true;
     }
     if (this.size < this.size_min)
     {
-      this.size = this.size_min;  
+      this.size = this.size_min;
     }
   }
-  
-  
-  void randomize_growth(){
-     this.size_max = (1.0 + randomGaussian()) * 40.0;
-     this.growth_rate = (1.5 + randomGaussian())/2.5*20.0; 
-    
+
+
+  void randomize_growth() {
+    this.size_max = (1.0 + randomGaussian()) * 30.0;
+    this.growth_rate = (2.0 + randomGaussian())/(2.0 + 1.0) * 20.0;
   }
 }
 
