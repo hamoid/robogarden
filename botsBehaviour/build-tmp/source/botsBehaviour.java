@@ -18,19 +18,20 @@ Predators predators;
 Preys preys;
 
 public void setup() {
-  size(640, 640);
+  size(800, 600, P3D);
+  colorMode(HSB);
+  background(255);
   noFill();
   stroke(255);
 
-  predators = new Predators(10);
+  predators = new Predators(6);
   preys = new Preys(0);
 }
 
 public void draw() {
-  // background(0,0,0);
-  noStroke();
-  fill(0, 10);
-  rect(0,0, width, height);
+  background(255);
+  // camera(width/2.0, height * 2, (height/4.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0); 
+
 
   // predators.birth();
   preys.birth();
@@ -44,6 +45,8 @@ class AggroKiller extends Killer {
     super(l);
     hunting = random(50.0f, 72.0f);
     maxSpeed = random(2.8f, 3.6f);
+    c = color(100, 200, 100);
+    rotationRate = 0.2f;
   }
 
   // immahunta
@@ -52,13 +55,9 @@ class AggroKiller extends Killer {
     speed *= 1.1f;
     speed = min(speed, random(2.8f, 3.6f));
     // debug
-    stroke(255);
+    strokeWeight(1);
+    stroke(255, 100);
     line(location.x, location.y, target.x, target.y);
-  }
-
-  public void display() {
-    stroke(255,128,0);
-    ellipse(location.x,location.y,8,8);
   }
 }
 class BombKiller extends Killer {
@@ -72,6 +71,7 @@ class BombKiller extends Killer {
     senseRadius = random(36.0f, 48.0f);
     bombRadius = random(36.0f, 48.0f);
     tolerance = PApplet.parseInt(random(15, 20));
+    c = color(200, 200, 100);
   }
 
   public void run() {
@@ -110,26 +110,29 @@ class BombKiller extends Killer {
     stroke(0,255,255);
     ellipse(location.x, location.y, bombRadius, bombRadius);
   }
-
-  public void display() {
-    stroke(255,0,128);
-    ellipse(location.x,location.y,8,8);
-  }
 }
+// okay, let's have our dear robots be enraged when they are surrounded by trees
+
 class Killer extends Walker {
   float hunting;
   float killing;
+
+  float senseRadius;
+  int tolerance;
+  float rage;
 
   Killer(PVector l) {
     super(l);
     hunting = 50.0f;
     killing = 10.0f;
+    senseRadius = random(36.0f, 48.0f);
+    tolerance = PApplet.parseInt(random(4, 12));
+    rage = 0.0f;
   }
 
   public void run() {
-    update();
-    look();
-    display();
+    super.run();
+    mood();
   }
 
   public void look() {
@@ -139,22 +142,33 @@ class Killer extends Walker {
     }
 
     int index = -1;
-    float distance = hunting;
+    float nearest = hunting;
+    int counter = 0;
 
     for (int i = preys.particles.size()-1; i >= 0; i--) {
       Particle prey = preys.particles.get(i);
-      if (location.dist(prey.location) < distance) {
+      float distance = location.dist(prey.location);
+      if (distance < nearest) {
         index = i;
-        distance = location.dist(prey.location);
+        nearest = distance;
       }
+
+      if (distance < senseRadius)
+        counter++;
     }
 
-    if (index != -1 && distance < killing) {
-      kill(index);
-    } else if (index != -1) {
-      hunt(index);
-    } else {
-      normal();
+    if (counter > tolerance) {
+      rage += random(80, 120);
+    }
+
+    if (!isAvoiding) {
+      if (index != -1 && nearest < killing) {
+        kill(index);
+      } else if (index != -1) {
+        hunt(index);
+      } else {
+        normal();
+      }      
     }
   }
 
@@ -172,12 +186,28 @@ class Killer extends Walker {
   public void hunt(int index) {
     target = preys.particles.get(index).location;
     // debug
-    stroke(255);
+    strokeWeight(1);
+    stroke(255, 100);
     line(location.x, location.y, target.x, target.y);
   }
 
   public void normal() {
-    speed = 1.0f;
+    speed = 5;
+  }
+
+  public void mood() {
+    if (rage < 0.1f) {
+      rage = 0;
+      rotationRate = 0.05f;
+      speed = 5.0f;
+      c = color(0, 200, 100);
+    } else {
+      rage -= 1.0f;
+      rotationRate = 0.2f;
+      speed *= 1.1f;
+      speed = min(speed, random(8.4f, 9.2f));
+      c = color(100, 255, 125);
+    }
   }
 }
 class Particle {
@@ -206,8 +236,13 @@ class Particle {
 
   // Method to display
   public void display() {
-    stroke(255);
-    ellipse(location.x,location.y,8,8);
+    stroke(100,255,255);
+    pushMatrix();
+      translate(location.x, location.y, location.z);
+      // sphere(8);
+      strokeWeight(8);
+      point(0,0,0);
+    popMatrix();
   }
 
   public void kill() {
@@ -298,7 +333,7 @@ class Predators extends ParticleSystem {
 
   // roll of the dice for birth
   public void birth() {
-    if (random(0,1) < 0.01f) {
+    if (random(0,1) < 0.001f) {
       this.addParticle();
     }
   }
@@ -308,14 +343,12 @@ class Predators extends ParticleSystem {
     PVector location = new PVector(random(0, width), random(0, height));
     Particle p;
 
-    if (random(0, 1) < 0.22f)
-      p = new AggroKiller(location);
-    else if (random(0, 1) < 0.22f)
-      p = new BombKiller(location);
-    else
-      // p = new BombKiller(location);
-      p = new AggroKiller(location);
-      // p = new Killer(location);
+    // if (random(0, 1) < 0.5)
+    //   p = new AggroKiller(location);
+    // // else if (random(0, 1) < 0.22)
+    // //   p = new BombKiller(location);
+    // else
+      p = new Killer(location);
     particles.add(p);
   }
 }
@@ -340,35 +373,69 @@ class Preys extends ParticleSystem {
 }
 class Walker extends Particle {
   PVector target;
-  float speed;
+  float sz, dir, speed;
+  float rotationRate;
+  int c;
+
+  // stuff for avoidance
+  boolean isAvoiding;
+  float avoidance;
 
   Walker(PVector l) {
     super(l);
     target = new PVector(random(0, width), random(0, height));
-    speed = 1.0f;
+    sz = 20;
+    speed = 5;
+    dir = 0;
+    c = color(0, 200, 100);
+    rotationRate = 0.05f;
+    isAvoiding = false;
+    avoidance = random(30.0f, 40.0f);
   }
 
   public void run() {
     update();
     look();
+    avoid();
     display();
   }
 
   // Method to update location
   public void update() {
-    PVector l = location.get();
-    PVector d = target.get();
-    d.sub(l);
-    d.normalize();
-    acceleration = d;
+    // PVector l = location.get();
+    // PVector d = target.get();
+    // d.sub(l);
+    // d.normalize();
+    // acceleration = d;
 
-    velocity.add(acceleration);
-    velocity.normalize();
-    velocity.mult(speed);
-    location.add(velocity);
+    // velocity.add(acceleration);
+    // velocity.normalize();
+    // velocity.mult(speed);
+    // location.add(velocity);
 
-    acceleration.x = 0;
-    acceleration.y = 0;
+    // acceleration.x = 0;
+    // acceleration.y = 0;
+
+    if (location.dist(target) < 1) {
+      return;
+    }
+
+    float tdir = atan2(target.y - location.y, target.x - location.x);
+    float dirDiff = tdir - dir;
+    PVector pDiff = PVector.sub(target, location);
+
+    if (abs(dirDiff) < rotationRate) {
+      dir = tdir;
+      if (pDiff.mag() > 5) {
+        // move
+        pDiff.normalize();
+        pDiff.mult(5);
+        location.add(pDiff);
+      }
+    } else {
+      // rotate
+      dir += dirDiff > 0 ? rotationRate : -rotationRate;
+    }
   }
 
   public void look() {
@@ -377,14 +444,66 @@ class Walker extends Particle {
     }
   }
 
+  public void avoid() {
+    for (int i = predators.particles.size()-1; i >= 0; i--) {
+      Particle other = predators.particles.get(i);
+      float distance = location.dist(other.location);
+      if (distance < avoidance && distance != 0) {
+        isAvoiding = true;
+
+        // run in the opposite direction
+        PVector opposite = location.get();
+        opposite.sub(other.location);
+        opposite.normalize();
+        opposite.mult(avoidance);
+        opposite.add(location);
+        target = opposite;
+      }
+    }
+  }
+
   public void philander() {
     target.x = random(0, width);
     target.y = random(0, height);
+    isAvoiding = false;
   }
 
   public void display() {
-    stroke(255, 0, 0);
-    ellipse(location.x,location.y,8,8);
+    rectMode(CENTER);
+    noStroke();
+    
+    pushMatrix();
+    translate(location.x, location.y);
+    scale(sz);
+    rotate(dir);
+
+    fill(c);
+
+    box(1.0f, 0.8f, 0.1f);
+
+    pushMatrix();
+    translate(0, 0.5f);
+    box(1.0f, 0.1f, 0.3f);
+    popMatrix();
+    
+    pushMatrix();
+    translate(0, -0.5f);
+    box(1.0f, 0.1f, 0.3f);
+    popMatrix();
+
+    fill(255);
+
+    pushMatrix();
+    translate(0.4f, 0.2f, 0.2f);
+    box(0.1f);
+    popMatrix();
+    
+    pushMatrix();
+    translate(0.4f, -0.2f, 0.2f);
+    box(0.1f);
+    popMatrix();
+
+    popMatrix();
   }
 }
   static public void main(String[] passedArgs) {

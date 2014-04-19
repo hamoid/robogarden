@@ -24,8 +24,13 @@ class Particle {
 
   // Method to display
   void display() {
-    stroke(255);
-    ellipse(location.x,location.y,8,8);
+    stroke(100,255,255);
+    pushMatrix();
+      translate(location.x, location.y, location.z);
+      // sphere(8);
+      strokeWeight(8);
+      point(0,0,0);
+    popMatrix();
   }
 
   void kill() {

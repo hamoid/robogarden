@@ -5,6 +5,8 @@ class AggroKiller extends Killer {
     super(l);
     hunting = random(50.0, 72.0);
     maxSpeed = random(2.8, 3.6);
+    c = color(100, 200, 100);
+    rotationRate = 0.2;
   }
 
   // immahunta
@@ -13,12 +15,8 @@ class AggroKiller extends Killer {
     speed *= 1.1;
     speed = min(speed, random(2.8, 3.6));
     // debug
-    stroke(255);
+    strokeWeight(1);
+    stroke(255, 100);
     line(location.x, location.y, target.x, target.y);
-  }
-
-  void display() {
-    stroke(255,128,0);
-    ellipse(location.x,location.y,8,8);
   }
 }

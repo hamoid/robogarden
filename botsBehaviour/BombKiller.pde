@@ -9,6 +9,7 @@ class BombKiller extends Killer {
     senseRadius = random(36.0, 48.0);
     bombRadius = random(36.0, 48.0);
     tolerance = int(random(15, 20));
+    c = color(200, 200, 100);
   }
 
   void run() {
@@ -46,10 +47,5 @@ class BombKiller extends Killer {
     // debug
     stroke(0,255,255);
     ellipse(location.x, location.y, bombRadius, bombRadius);
-  }
-
-  void display() {
-    stroke(255,0,128);
-    ellipse(location.x,location.y,8,8);
   }
 }
