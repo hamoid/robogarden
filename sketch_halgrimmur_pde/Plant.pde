@@ -7,8 +7,9 @@ class Plant
   float growth_rate;
   float time_born;
   boolean fully_grown, can_spawn;
-
-  public Plant(float x, float y)
+  int generation;
+  
+  public Plant(float x, float y, int generation)
   {
     this.x = x;
     this.y = y;
@@ -20,6 +21,7 @@ class Plant
     this.size = size_min;
     this.fully_grown = false;
     this.can_spawn = true;
+    this.generation = generation;
   }
 
   void draw()
@@ -57,8 +59,15 @@ class Plant
 
 
   void randomize_growth() {
-    this.size_max = (5.0 + randomGaussian())/6.0 * 30.0;
+    float exponential_factor = exp( - this.generation * 0.1 );
+    this.size_max = (5.0 + randomGaussian())/6.0 * 40.0 * exponential_factor;
     this.growth_rate = (5.0 + randomGaussian())/(5.0 + 1.0) * 20.0;
+    
+    if (random(1.0) > exponential_factor) 
+    {
+       this.can_spawn = false; 
+    }
+    
   }
 }
 

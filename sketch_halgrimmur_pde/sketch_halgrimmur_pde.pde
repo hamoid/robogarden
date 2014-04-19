@@ -7,7 +7,7 @@ void setup()
   size(800, 600, P2D); 
 
   vegetation = new ArrayList<Plant>();
-  Plant x = new Plant(random(width), random(height));
+  Plant x = new Plant(random(width), random(height), 0);
   //x.randomize_growth();
   vegetation.add(x);
 }
@@ -66,7 +66,7 @@ void update_vegetation() {
 
         if ( does_not_overlap) 
         {
-          Plant sapling = new Plant(sx, sy);
+          Plant sapling = new Plant(sx, sy, plant.generation+1);
           sapling.randomize_growth();
           vegetation.add(sapling);
         }
