@@ -26,6 +26,9 @@ class Plant
 
   void draw()
   {
+    pushMatrix();
+    noStroke();
+    lights();
     if (this.fully_grown)
     {
       fill(128, 200, 0);
@@ -34,7 +37,10 @@ class Plant
     {
       fill(100, 255, 30);
     }
-    ellipse(this.x, this.y, this.size, this.size);
+    translate(this.x, this.y, 0);
+    sphereDetail(10);
+    sphere( this.size/2.0 );
+    popMatrix();
   }
 
   void update(float dt)
