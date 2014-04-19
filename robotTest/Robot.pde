@@ -1,7 +1,11 @@
 class Robot {
+  public static final int STILL = 0;
+  public static final int MOVING = 1;
+  public static final int ROTATING = 2;
   PVector pos, tpos;
   float sz, dir, speed;
   color c;
+  int mode;
   Emo emo;
 
   Robot(float x, float y) {
@@ -13,6 +17,7 @@ class Robot {
     c = color(random(255), 200, 100);
     
     emo = new Emo();
+    mode = STILL;
   }
 
   void draw() {
@@ -69,10 +74,14 @@ class Robot {
         pDiff.normalize();
         pDiff.mult(5);
         pos.add(pDiff);
+        mode = MOVING;
+      } else {
+        mode = STILL;
       }
     } else {
       // rotate
       dir += dirDiff > 0 ? 0.05 : -0.05;
+      mode = ROTATING;
     }
   }
 
@@ -80,6 +89,7 @@ class Robot {
     tpos.x = random(width);
     tpos.y = random(height);
     emo.load();
+    mode = STILL;
   }
 }
 

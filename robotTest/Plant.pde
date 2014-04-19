@@ -35,7 +35,7 @@ class Plant
     noStroke();
     fill(this.hue, this.value, this.saturation);
     translate(this.x, this.y, 0);
-    sphereDetail(10);
+    sphereDetail(5);
     sphere( this.size/2.0 );
     popMatrix();
     noLights();
