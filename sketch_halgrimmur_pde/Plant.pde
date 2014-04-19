@@ -33,9 +33,21 @@ class Plant
 
   void update_growth() {
     this.size =  this.size_min + this.growth_rate * this.age;
-    if (this.size > this.size_max) {
+    if (this.size > this.size_max) 
+    {
       this.size = this.size_max;
     }
+    if (this.size < this.size_min)
+    {
+      this.size = this.size_min;  
+    }
+  }
+  
+  
+  void randomize_growth(){
+     this.size_max = (1.0 + randomGaussian()) * 40.0;
+     this.growth_rate = (1.5 + randomGaussian())/2.5*20.0; 
+    
   }
 }
 
