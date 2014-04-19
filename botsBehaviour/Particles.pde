@@ -28,13 +28,8 @@ class ParticleSystem {
 
   // generate possible tank
   void addParticle() {
-    Particle p;
     PVector location = new PVector(random(0, width), random(0, height));
-    if (random(0, 1) < 0.1) {
-      p = new Walker(location);
-    } else {
-      p = new Particle(location);
-    }
+    Particle p = new Particle(location);
     particles.add(p);
   }
 

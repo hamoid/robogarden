@@ -32,9 +32,10 @@ class Killer extends Walker {
     float nearest = hunting;
     int counter = 0;
 
-    for (int i = preys.particles.size()-1; i >= 0; i--) {
-      Particle prey = preys.particles.get(i);
-      float distance = location.dist(prey.location);
+    for (int i = plants.vegetation.size()-1; i >= 0; i--) {
+      Plant prey = plants.vegetation.get(i);
+      PVector preyLocation = new PVector(prey.x, prey.y);
+      float distance = location.dist(preyLocation);
       if (distance < nearest) {
         index = i;
         nearest = distance;
@@ -61,21 +62,16 @@ class Killer extends Walker {
 
   // immakilla
   void kill(int index) {
-    target = preys.particles.get(index).location;
-    preys.particles.get(index).kill();
-    // debug
-    stroke(255,0,0);
-    line(location.x, location.y, target.x, target.y);
+    Plant prey = plants.vegetation.get(index);
+    target = new PVector(prey.x, prey.y);
+    plants.vegetation.get(index).kill();
     philander();
   }
 
   // immahunta
   void hunt(int index) {
-    target = preys.particles.get(index).location;
-    // debug
-    strokeWeight(1);
-    stroke(255, 100);
-    line(location.x, location.y, target.x, target.y);
+    Plant prey = plants.vegetation.get(index);
+    target = new PVector(prey.x, prey.y);
   }
 
   void normal() {
@@ -87,13 +83,13 @@ class Killer extends Walker {
       rage = 0;
       rotationRate = 0.05;
       speed = 5.0;
-      c = color(0, 200, 100);
+      c = color(200, 200, 100);
     } else {
       rage -= 1.0;
       rotationRate = 0.2;
       speed *= 1.1;
       speed = min(speed, random(8.4, 9.2));
-      c = color(100, 255, 125);
+      c = color(0, 255, 125);
     }
   }
 }

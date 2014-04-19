@@ -16,27 +16,93 @@ public class botsBehaviour extends PApplet {
 
 Predators predators;
 Preys preys;
+PlantGroup plants;
+Walker planter;
+
+PImage tracks;
 
 public void setup() {
-  size(800, 600, P3D);
+  size(1344, 768, P3D);
   colorMode(HSB);
   background(255);
   noFill();
-  stroke(255);
+  rectMode(CENTER);
 
-  predators = new Predators(6);
+  predators = new Predators(1, 3);
   preys = new Preys(0);
+  plants = new PlantGroup();
+
+  planter = predators.particles.get(0);
+
+  tracks = createImage(1600, 1200, RGB);
+  tracks.loadPixels();
+  for (int i = 0; i < tracks.pixels.length; i++) {
+    tracks.pixels[i] = color(32, 50, random(210, 230));
+  }
+  tracks.updatePixels();
 }
 
 public void draw() {
-  background(255);
+  background(0xffE2F0C4);
+  camera(width/2.0f, mouseY, mouseX, width/2.0f, height/2.0f, 0, 0, 1, 0);
   // camera(width/2.0, height * 2, (height/4.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0); 
 
+  // float camx = 200 * sin(frameCount * 0.001);
+  // float camy = 200 * cos(frameCount * 0.001);
+
+  // camera(
+  // planter.location.x, planter.location.y + height*0.5, height * 0.5, 
+  // planter.location.x + camx, planter.location.y + camy, planter.location.z, 
+  // 0, 1, 0);
+  hint(ENABLE_DEPTH_TEST);
+  noStroke();
+  drawGround();
 
   // predators.birth();
+  plants.update();
+  plants.draw();
+
   preys.birth();
   predators.run();
   preys.run();
+
+  for (int i = predators.particles.size()-1; i >= 0; i--) {
+    darkenRobotTracks(predators.particles.get(i));
+  }
+
+
+  noLights();
+  camera();
+  hint(DISABLE_DEPTH_TEST);
+  predators.drawEmos();
+}
+
+public void darkenRobotTracks(Walker bot) {
+  tracks.loadPixels();
+  for (int i=0; i<30; i++) {
+    int x = (int)((bot.location.x / width) * tracks.width + random(-5, 5));
+    int y = (int)((bot.location.y / height) * tracks.height + random(-5, 5));
+
+    int which = x + y * tracks.width;
+    if (which < 0) which = 0;
+    if (which > tracks.pixels.length) which = tracks.pixels.length - 1;
+
+    int c = tracks.pixels[which];
+    c = color(hue(c), saturation(c), brightness(c) - 20);
+    tracks.pixels[which] = c;  
+  }
+  tracks.updatePixels();
+}
+
+public void drawGround() {
+  beginShape();
+  textureMode(NORMAL);
+  texture(tracks);
+  vertex(0, 0, 0, 0);
+  vertex(width, 0, 1, 0);
+  vertex(width, height, 1, 1);
+  vertex(0, height, 0, 1);
+  endShape();
 }
 class AggroKiller extends Killer {
   float maxSpeed;
@@ -111,6 +177,25 @@ class BombKiller extends Killer {
     ellipse(location.x, location.y, bombRadius, bombRadius);
   }
 }
+class Emo {
+  PImage img;
+  PVector pos;
+
+  Emo() {
+    load();
+    pos = new PVector();
+  }  
+  public void load() {
+    img = loadImage("icon" + nf(1 + PApplet.parseInt(random(21)), 3) + ".png");
+  }
+  public void setPos(float x, float y) {
+    pos.x = x;
+    pos.y = y;
+  }
+  public void draw() {
+    image(img, pos.x + 20, pos.y - 50);
+  }
+}
 // okay, let's have our dear robots be enraged when they are surrounded by trees
 
 class Killer extends Walker {
@@ -145,9 +230,10 @@ class Killer extends Walker {
     float nearest = hunting;
     int counter = 0;
 
-    for (int i = preys.particles.size()-1; i >= 0; i--) {
-      Particle prey = preys.particles.get(i);
-      float distance = location.dist(prey.location);
+    for (int i = plants.vegetation.size()-1; i >= 0; i--) {
+      Plant prey = plants.vegetation.get(i);
+      PVector preyLocation = new PVector(prey.x, prey.y);
+      float distance = location.dist(preyLocation);
       if (distance < nearest) {
         index = i;
         nearest = distance;
@@ -174,21 +260,16 @@ class Killer extends Walker {
 
   // immakilla
   public void kill(int index) {
-    target = preys.particles.get(index).location;
-    preys.particles.get(index).kill();
-    // debug
-    stroke(255,0,0);
-    line(location.x, location.y, target.x, target.y);
+    Plant prey = plants.vegetation.get(index);
+    target = new PVector(prey.x, prey.y);
+    plants.vegetation.get(index).kill();
     philander();
   }
 
   // immahunta
   public void hunt(int index) {
-    target = preys.particles.get(index).location;
-    // debug
-    strokeWeight(1);
-    stroke(255, 100);
-    line(location.x, location.y, target.x, target.y);
+    Plant prey = plants.vegetation.get(index);
+    target = new PVector(prey.x, prey.y);
   }
 
   public void normal() {
@@ -200,13 +281,13 @@ class Killer extends Walker {
       rage = 0;
       rotationRate = 0.05f;
       speed = 5.0f;
-      c = color(0, 200, 100);
+      c = color(200, 200, 100);
     } else {
       rage -= 1.0f;
       rotationRate = 0.2f;
       speed *= 1.1f;
       speed = min(speed, random(8.4f, 9.2f));
-      c = color(100, 255, 125);
+      c = color(0, 255, 125);
     }
   }
 }
@@ -279,13 +360,8 @@ class ParticleSystem {
 
   // generate possible tank
   public void addParticle() {
-    Particle p;
     PVector location = new PVector(random(0, width), random(0, height));
-    if (random(0, 1) < 0.1f) {
-      p = new Walker(location);
-    } else {
-      p = new Particle(location);
-    }
+    Particle p = new Particle(location);
     particles.add(p);
   }
 
@@ -293,42 +369,284 @@ class ParticleSystem {
     particles.add(p);
   }
 }
-class Plant extends Particle {
-  float range;
+class Plant 
+{ 
 
-  Plant(PVector l) {
+  float x, y; // positions
+  float age; // in seconds
+  float size, size_min, size_max;
+  float growth_rate;
+  float time_born;
+  boolean fully_grown, can_spawn;
+  int generation;
+  int hue, saturation, value;
+  boolean isDead;
+
+  public Plant(float x, float y, int hue, int generation)
+  {
+    this.x = x;
+    this.y = y;
+    this.time_born = millis()/1000.0f;
+    this.age = 0.0f;
+    this.size_min = 1;
+    this.size_max = 30;
+    this.growth_rate = 20.0f;
+    this.size = size_min;
+    this.fully_grown = false;
+    this.can_spawn = true;
+    this.generation = generation;
+    this.saturation = 200;
+    this.hue = hue;
+    this.value = 255;
+
+    isDead = false;
+  }
+
+  public void draw()
+  {
+    pushMatrix();
+    noStroke();
+    lights();
+      fill(this.hue, this.value, this.saturation);
+    translate(this.x, this.y, 0);
+    sphereDetail(10);
+    sphere( this.size/2.0f );
+    popMatrix();
+  }
+
+  public void update(float dt)
+  {
+    this.age = millis()/1000.0f - this.time_born; 
+
+    update_growth();
+  }
+
+  public void update_growth() {
+    this.size =  this.size_min + this.growth_rate * this.age;
+    this.value = PApplet.parseInt( 255.0f - 55.0f*this.size_max/this.size );
+    if (this.size > this.size_max) 
+    {
+      this.size = this.size_max;
+      this.fully_grown = true;
+    }
+    if (this.size < this.size_min)
+    {
+      this.size = this.size_min;
+    }
+  }
+
+  public void randomize_growth() {
+    float exponential_factor = exp( - this.generation * 0.1f );
+    this.size_max = (5.0f + randomGaussian())/6.0f * 30.0f * exponential_factor;
+    this.growth_rate = (5.0f + randomGaussian())/(5.0f + 1.0f) * 10 * exponential_factor;
+    this.saturation = PApplet.parseInt( exponential_factor * this.saturation );
+
+    if (random(1.0f) > exponential_factor) 
+    {
+      this.can_spawn = false;
+    }
+  }
+
+  public void kill() {
+    isDead = true;
+  }
+}
+
+class Plant3D {
+  private final int LEVELS = 50;
+  PVector pos;
+  int age;
+  PShape[] plant;
+  
+  Plant3D(float x, float y) {
+    pos = new PVector(x, y);
+    age = 0;
+    plant = new PShape[LEVELS];
+
+    PVector posa = pos.get();
+    PVector posb = pos.get();
+    for(int i=0; i<LEVELS; i++) {
+      posb = posa.get();
+      posb.z += 10;
+      plant[i] = createPrism(posa, posb);
+      posa = posb.get();
+    }
+  }
+  
+  public void draw() {
+    for(int i=0; i<age; i++) {
+      shape(plant[i]);
+    }
+    age = min(LEVELS, age + 1);
+  }
+  public PShape createPrism(PVector a, PVector b) {
+    float d = PVector.dist(a, b) * 0.5f;
+    float T3 = TAU / 3;
+    PVector p1 = new PVector(b.x + d * cos(T3*1), b.y + d * sin(T3*1), b.z);
+    PVector p2 = new PVector(b.x + d * cos(T3*2), b.y + d * sin(T3*2), b.z);
+    PVector p3 = new PVector(b.x + d * cos(T3*3), b.y + d * sin(T3*3), b.z);
+    PShape sh = createShape();
+    sh.beginShape(TRIANGLES);
+    sh.noStroke();
+    sh.fill(random(100, 200));
+    
+    sh.vertex(p1.x, p1.y, p1.z);
+    sh.vertex(p2.x, p2.y, p2.z);
+    sh.vertex(p3.x, p3.y, p3.z);
+
+    sh.vertex(p1.x, p1.y, p1.z);
+    sh.vertex(p2.x, p2.y, p2.z);
+    sh.vertex(a.x, a.y, a.z);
+
+    sh.vertex(p2.x, p2.y, p2.z);
+    sh.vertex(p3.x, p3.y, p3.z);
+    sh.vertex(a.x, a.y, a.z);
+
+    sh.vertex(p3.x, p3.y, p3.z);
+    sh.vertex(p1.x, p1.y, p1.z);
+    sh.vertex(a.x, a.y, a.z);
+    
+    sh.endShape();
+    return sh;
+  }
+}
+class PlantGroup {
+
+  ArrayList<Plant> vegetation;
+
+  PlantGroup() 
+  {
+    vegetation = new ArrayList<Plant>();
+  }
+
+  public void seed_plant(float x, float y)
+  {
+    Plant root = new Plant(x, y, PApplet.parseInt(random(80,130)), 0);
+    root.randomize_growth();
+    vegetation.add(root);
+  }
+  
+  public void draw()
+  {
+    for (int p=0; p<vegetation.size(); p++)
+    {
+      Plant plant = vegetation.get(p);
+      plant.draw();
+    }
+  }
+
+  public void update()
+  {
+    // yang: iterating backwards so we can kill plants
+    for (int p = vegetation.size()-1; p >= 0; p--) {
+      Plant plant = vegetation.get(p);
+      plant.update(0);
+      if (plant.isDead) {
+        vegetation.remove(p);
+      }
+    }
+
+    for (int p=0; p<vegetation.size(); p++)
+    {
+      Plant plant = vegetation.get(p);
+      plant.update(0);
+    }
+    for (int p=0; p<vegetation.size(); p++)
+    {
+      Plant plant = vegetation.get(p);
+      if (plant.fully_grown == true && plant.can_spawn) 
+      {
+        for (int s=0; s<random(3,6); s++) {
+          float radius = plant.size_max + 4.0f;
+          float angle = random(0.0f, TAU);
+
+          float sx, sy;
+          sx = radius * cos(angle) + plant.x;
+          sy = radius * sin(angle) + plant.y;
+
+          boolean does_not_overlap = true;
+
+          for (int p2=0; p2<vegetation.size(); p2++) 
+          {
+            Plant plant2=vegetation.get(p2);
+            if (dist(sx, sy, plant2.x, plant2.y) < plant2.size_max || outside_screen(sx, sy))
+            {
+              does_not_overlap = false;
+              break;
+            }
+          }
+
+          if ( does_not_overlap) 
+          {
+            Plant sapling = new Plant(sx, sy, plant.hue, plant.generation+1);
+            sapling.randomize_growth();
+            vegetation.add(sapling);
+          }
+        }
+        plant.can_spawn = false;
+      }
+    }
+  }
+
+  public boolean outside_screen(float x, float y) 
+  {
+    if (x<0 || x>width || y<0 || y>height)
+    {
+      return true;
+    }
+    return false;
+  }
+}
+
+class Planter extends Walker {
+
+  Planter(PVector l) {
     super(l);
-    velocity.x = 0;
-    velocity.y = 0;
-    range = random(10, 12);
+    speed = 2.0f;
+    c = color(0);
   }
 
   public void run() {
     update();
-    grow();
+    look();
+    avoid();
+    layseed();
     display();
   }
 
-  public void grow() {
-    if (random(0, 1) < 0.0005f) {
-      sprout();
+  public void layseed() {
+    if (random(0, 1) < 0.02f)
+      plants.seed_plant(location.x, location.y);
+  }
+
+  public void philander() {
+    target.x = random(0, width);
+    target.y = random(0, height);
+    isAvoiding = false;
+    emo.load();
+  }
+}
+class Predators {
+  ArrayList<Walker> particles;
+
+  Predators(int p, int k) {
+    particles = new ArrayList<Walker>();
+    for (int i = 0; i < p; i++) {
+      this.addPlanter();
+    }
+    for (int i = 0; i < k; i++) {
+      this.addParticle();
     }
   }
 
-  public void sprout() {
-    float angle = random(0, 1) * TWO_PI;
-    float radius = random(0, range);
-    PVector spawn = new PVector(location.x+sin(angle)*radius, location.y+cos(angle)*radius);
-    preys.addParticle(new Plant(spawn));
-
-    // debug
-    stroke(0,255,0);
-    line(location.x, location.y, spawn.x, spawn.y);
-  }
-}
-class Predators extends ParticleSystem {
-  Predators(int num) {
-    super(num);
+  public void run() {
+    for (int i = particles.size()-1; i >= 0; i--) {
+      Walker p = particles.get(i);
+      p.run();
+      if (p.isDead) {
+        particles.remove(i);
+      }
+    }
   }
 
   // roll of the dice for birth
@@ -341,15 +659,20 @@ class Predators extends ParticleSystem {
   // generate possible tank
   public void addParticle() {
     PVector location = new PVector(random(0, width), random(0, height));
-    Particle p;
-
-    // if (random(0, 1) < 0.5)
-    //   p = new AggroKiller(location);
-    // // else if (random(0, 1) < 0.22)
-    // //   p = new BombKiller(location);
-    // else
-      p = new Killer(location);
+    Walker p = new Killer(location);
     particles.add(p);
+  }
+
+  public void addPlanter() {
+    PVector location = new PVector(random(0, width), random(0, height));
+    Walker p = new Planter(location);
+    particles.add(p);
+  }
+
+  public void drawEmos() {
+    for (int i = predators.particles.size()-1; i >= 0; i--) {
+      predators.particles.get(i).emo.draw();
+    }
   }
 }
 class Preys extends ParticleSystem {
@@ -359,16 +682,16 @@ class Preys extends ParticleSystem {
   // roll of the dice for birth
   public void birth() {
     if (random(0,1) < 0.05f) {
-      this.addParticle();
+      // this.addParticle();
     }
   }
 
   public void addParticle() {
-    float angle = random(0, 1) * TWO_PI;
-    float radius = random(0, width/2);
-    PVector location = new PVector(width/2+sin(angle)*radius, height/2+cos(angle)*radius);
-    Particle p = new Plant(location);
-    particles.add(p);
+    // float angle = random(0, 1) * TWO_PI;
+    // float radius = random(0, width/2);
+    // PVector location = new PVector(width/2+sin(angle)*radius, height/2+cos(angle)*radius);
+    // Particle p = new Plant(location);
+    // particles.add(p);
   }
 }
 class Walker extends Particle {
@@ -376,6 +699,7 @@ class Walker extends Particle {
   float sz, dir, speed;
   float rotationRate;
   int c;
+  Emo emo;
 
   // stuff for avoidance
   boolean isAvoiding;
@@ -387,10 +711,12 @@ class Walker extends Particle {
     sz = 20;
     speed = 5;
     dir = 0;
-    c = color(0, 200, 100);
+    c = color(200, 200, 100);
     rotationRate = 0.05f;
     isAvoiding = false;
     avoidance = random(30.0f, 40.0f);
+    emo = new Emo();
+    emo.load();
   }
 
   public void run() {
@@ -402,20 +728,6 @@ class Walker extends Particle {
 
   // Method to update location
   public void update() {
-    // PVector l = location.get();
-    // PVector d = target.get();
-    // d.sub(l);
-    // d.normalize();
-    // acceleration = d;
-
-    // velocity.add(acceleration);
-    // velocity.normalize();
-    // velocity.mult(speed);
-    // location.add(velocity);
-
-    // acceleration.x = 0;
-    // acceleration.y = 0;
-
     if (location.dist(target) < 1) {
       return;
     }
@@ -429,7 +741,7 @@ class Walker extends Particle {
       if (pDiff.mag() > 5) {
         // move
         pDiff.normalize();
-        pDiff.mult(5);
+        pDiff.mult(speed);
         location.add(pDiff);
       }
     } else {
@@ -466,10 +778,10 @@ class Walker extends Particle {
     target.x = random(0, width);
     target.y = random(0, height);
     isAvoiding = false;
+    emo.load();
   }
 
   public void display() {
-    rectMode(CENTER);
     noStroke();
     
     pushMatrix();
@@ -480,6 +792,8 @@ class Walker extends Particle {
     fill(c);
 
     box(1.0f, 0.8f, 0.1f);
+
+    emo.setPos(screenX(0, 0, 0), screenY(0, 0, 0));
 
     pushMatrix();
     translate(0, 0.5f);
