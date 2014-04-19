@@ -9,11 +9,11 @@ class PlantGroup {
 
   void seed_plant(float x, float y)
   {
-    Plant root = new Plant(x, y, int(random(80,130)), 0);
+    Plant root = new Plant(x, y, int(random(80, 130)), 0);
     root.randomize_growth();
     vegetation.add(root);
   }
-  
+
   void draw()
   {
     for (int p=0; p<vegetation.size(); p++)

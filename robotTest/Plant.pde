@@ -30,14 +30,15 @@ class Plant
 
   void draw()
   {
+    lights();
     pushMatrix();
     noStroke();
-    lights();
-      fill(this.hue, this.value, this.saturation);
+    fill(this.hue, this.value, this.saturation);
     translate(this.x, this.y, 0);
     sphereDetail(10);
     sphere( this.size/2.0 );
     popMatrix();
+    noLights();
   }
 
   void update(float dt)
