@@ -8,12 +8,6 @@ class Killer extends Walker {
     killing = 10.0;
   }
 
-  void run() {
-    update();
-    look();
-    display();
-  }
-
   void look() {
     // hit target, change walk
     if (location.dist(target) < 10.0) {
@@ -31,12 +25,14 @@ class Killer extends Walker {
       }
     }
 
-    if (index != -1 && distance < killing) {
-      kill(index);
-    } else if (index != -1) {
-      hunt(index);
-    } else {
-      normal();
+    if (!isAvoiding) {
+      if (index != -1 && distance < killing) {
+        kill(index);
+      } else if (index != -1) {
+        hunt(index);
+      } else {
+        normal();
+      }      
     }
   }
 
@@ -54,11 +50,12 @@ class Killer extends Walker {
   void hunt(int index) {
     target = preys.particles.get(index).location;
     // debug
-    stroke(255);
+    strokeWeight(1);
+    stroke(255, 100);
     line(location.x, location.y, target.x, target.y);
   }
 
   void normal() {
-    speed = 1.0;
+    speed = 5;
   }
 }
