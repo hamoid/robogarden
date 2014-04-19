@@ -1,4 +1,6 @@
 Robot r;
+PlantGroup plants;
+
 void setup() {
   size(800, 600, P3D);
   colorMode(HSB);
@@ -6,7 +8,7 @@ void setup() {
   rectMode(CENTER);
 
   r = new Robot(width/2, height/2);
-  
+  plants = new PlantGroup();
   println("Press space to assign new destination");
 }
 void draw() {
@@ -21,10 +23,14 @@ void draw() {
   rect(width/2, height/2, width, height);
   
   r.update();
+  plants.update();
+  
   r.draw();  
+  plants.draw();
 }
 void keyPressed() {
   if(key == ' ') {
     r.setRandomTarget();
+    plants.seed_plant(r.pos.x, r.pos.y);
   }
 }

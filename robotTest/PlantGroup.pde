@@ -2,14 +2,18 @@ class PlantGroup {
 
   ArrayList<Plant> vegetation;
 
-  PlantGroup(float x, float y) 
+  PlantGroup() 
   {
     vegetation = new ArrayList<Plant>();
-    Plant root = new Plant(x, y, 0);
-    //root.randomize_growth();
-    vegetation.add(root);
   }
 
+  void seed_plant(float x, float y)
+  {
+    Plant root = new Plant(x, y, int(random(80,130)), 0);
+    root.randomize_growth();
+    vegetation.add(root);
+  }
+  
   void draw()
   {
     for (int p=0; p<vegetation.size(); p++)
@@ -45,7 +49,7 @@ class PlantGroup {
           for (int p2=0; p2<vegetation.size(); p2++) 
           {
             Plant plant2=vegetation.get(p2);
-            if (dist(sx, sy, plant2.x, plant2.y) < plant2.size || outside_screen(sx, sy))
+            if (dist(sx, sy, plant2.x, plant2.y) < plant2.size_max || outside_screen(sx, sy))
             {
               does_not_overlap = false;
               break;
@@ -54,7 +58,7 @@ class PlantGroup {
 
           if ( does_not_overlap) 
           {
-            Plant sapling = new Plant(sx, sy, plant.generation+1);
+            Plant sapling = new Plant(sx, sy, plant.hue, plant.generation+1);
             sapling.randomize_growth();
             vegetation.add(sapling);
           }
