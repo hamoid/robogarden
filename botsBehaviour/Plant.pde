@@ -19,7 +19,7 @@ class Plant
     this.px = px;
     this.py = py;    
     this.time_born = millis()/1000.0;
-    this.age = 0.0;
+    this.age = 0.0;  
     this.size_min = 1;
     this.size_max = 30;
     this.growth_rate = 20.0;
@@ -36,6 +36,7 @@ class Plant
 
   void draw()
   {
+    
     pushMatrix();
     noStroke();
     lights();
@@ -44,6 +45,11 @@ class Plant
     sphereDetail(10);
     sphere( this.size/2.0 );
     popMatrix();
+    
+    stroke(10,255,128);
+    strokeWeight( this.size/this.size_max * 6.0);
+    line(this.px, this.py, 0, this.x, this.y, 0);
+    noStroke();
   }
 
   void update(float dt)
