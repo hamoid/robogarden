@@ -2,6 +2,7 @@ class Plant
 { 
 
   float x, y; // positions
+  float px, py; // parent position
   float age; // in seconds
   float size, size_min, size_max;
   float growth_rate;
@@ -11,10 +12,12 @@ class Plant
   int hue, saturation, value;
   boolean isDead;
 
-  public Plant(float x, float y, int hue, int generation)
+  public Plant(float x, float y, float px, float py, int hue, int generation)
   {
     this.x = x;
     this.y = y;
+    this.px = px;
+    this.py = py;    
     this.time_born = millis()/1000.0;
     this.age = 0.0;
     this.size_min = 1;

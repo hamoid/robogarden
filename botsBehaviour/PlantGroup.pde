@@ -1,4 +1,4 @@
-class PlantGroup {
+  class PlantGroup {
 
   ArrayList<Plant> vegetation;
 
@@ -9,7 +9,7 @@ class PlantGroup {
 
   void seed_plant(float x, float y)
   {
-    Plant root = new Plant(x, y, int(random(80,130)), 0);
+    Plant root = new Plant(x, y, x,y, int(random(80,130)), 0);
     root.randomize_growth();
     vegetation.add(root);
   }
@@ -66,7 +66,7 @@ class PlantGroup {
 
           if ( does_not_overlap) 
           {
-            Plant sapling = new Plant(sx, sy, plant.hue, plant.generation+1);
+            Plant sapling = new Plant(sx, sy, plant.x, plant.y, plant.hue, plant.generation+1);
             sapling.randomize_growth();
             vegetation.add(sapling);
           }
