@@ -3,7 +3,7 @@ class Walker extends Particle {
   public static final int MOVING = 1;
   public static final int ROTATING = 2;
 
-  PVector target;
+  PVector target, pDiff;    // expose pDiff for drawing tracks, alternatively, encapulate tracks into Walker
   float sz, dir, speed;
   float rotationRate;
   color c;
@@ -45,7 +45,7 @@ class Walker extends Particle {
 
     float tdir = atan2(target.y - location.y, target.x - location.x);
     float dirDiff = tdir - dir;
-    PVector pDiff = PVector.sub(target, location);
+    pDiff = PVector.sub(target, location);
 
     if (abs(dirDiff) < rotationRate) {
       dir = tdir;
