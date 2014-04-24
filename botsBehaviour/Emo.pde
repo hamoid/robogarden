@@ -6,9 +6,23 @@ class Emo {
     load();
     pos = new PVector();
   }  
+
   void load() {
-    img = loadImage("icon" + nf(1 + int(random(21)), 3) + ".png");
+    this.normal();
   }
+
+  void planter() {
+    img = loadImage("planter" + nf(1 + int(random(9)), 3) + ".png");
+  }
+
+  void normal() {
+    img = loadImage("normal" + nf(1 + int(random(6)), 3) + ".png");
+  }
+
+  void enraged() {
+    img = loadImage("enraged" + nf(1 + int(random(6)), 3) + ".png");
+  }
+
   void setPos(float x, float y) {
     pos.x = x;
     pos.y = y;

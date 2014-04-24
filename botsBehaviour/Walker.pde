@@ -26,7 +26,7 @@ class Walker extends Particle {
     avoidance = random(30.0, 40.0);
 
     emo = new Emo();
-    emo.load();
+    this.emotion();
 
     mode = STILL;
   }
@@ -34,7 +34,6 @@ class Walker extends Particle {
   void run() {
     update();
     look();
-    avoid();
     display();
   }
 
@@ -73,30 +72,17 @@ class Walker extends Particle {
     }
   }
 
-  void avoid() {
-    for (int i = predators.particles.size()-1; i >= 0; i--) {
-      Particle other = predators.particles.get(i);
-      float distance = location.dist(other.location);
-      if (distance < avoidance && distance != 0) {
-        isAvoiding = true;
-
-        // run in the opposite direction
-        PVector opposite = location.get();
-        opposite.sub(other.location);
-        opposite.normalize();
-        opposite.mult(avoidance);
-        opposite.add(location);
-        target = opposite;
-      }
-    }
-  }
-
   void philander() {
     target.x = random(0, width);
     target.y = random(0, height);
     isAvoiding = false;
-    emo.load();
+
+    this.emotion();
     mode = STILL;
+  }
+
+  void emotion() {
+    emo.load();
   }
 
   void display() {

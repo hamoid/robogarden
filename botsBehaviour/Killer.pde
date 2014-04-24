@@ -19,7 +19,7 @@ class Killer extends Walker {
 
   void run() {
     super.run();
-    mood();
+    enrage();
   }
 
   void look() {
@@ -78,7 +78,14 @@ class Killer extends Walker {
     speed = 5;
   }
 
-  void mood() {
+  void emotion() {
+    if (rage < 0.1)
+      emo.normal();
+    else
+      emo.enraged();
+  }
+
+  void enrage() {
     if (rage < 0.1) {
       rage = 0;
       rotationRate = 0.05;

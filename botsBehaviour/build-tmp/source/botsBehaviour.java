@@ -14,10 +14,8 @@ import java.io.IOException;
 
 public class botsBehaviour extends PApplet {
 
-Predators predators;
-Preys preys;
+Robots robots;
 PlantGroup plants;
-Walker planter;
 
 PImage tracks;
 
@@ -28,11 +26,8 @@ public void setup() {
   noFill();
   rectMode(CENTER);
 
-  predators = new Predators(1, 3);
-  preys = new Preys(0);
+  robots = new Robots(1, 3);
   plants = new PlantGroup();
-
-  planter = predators.particles.get(0);
 
   tracks = createImage(1600, 1200, RGB);
   tracks.loadPixels();
@@ -45,39 +40,27 @@ public void setup() {
 public void draw() {
   background(0xffE2F0C4);
   camera(width/2.0f, mouseY, mouseX, width/2.0f, height/2.0f, 0, 0, 1, 0);
-  // camera(width/2.0, height * 2, (height/4.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0); 
 
-  // float camx = 200 * sin(frameCount * 0.001);
-  // float camy = 200 * cos(frameCount * 0.001);
-
-  // camera(
-  // planter.location.x, planter.location.y + height*0.5, height * 0.5, 
-  // planter.location.x + camx, planter.location.y + camy, planter.location.z, 
-  // 0, 1, 0);
   hint(ENABLE_DEPTH_TEST);
   noStroke();
   drawGround();
 
-  // predators.birth();
   plants.update();
   plants.draw();
 
-  preys.birth();
-  predators.run();
-  preys.run();
+  robots.run();
 
-  for (int i = predators.particles.size()-1; i >= 0; i--) {
-    Walker bot = predators.particles.get(i);
+  for (int i = robots.particles.size()-1; i >= 0; i--) {
+    Walker bot = robots.particles.get(i);
     if (bot.mode == Walker.MOVING) {
       darkenRobotTracks(bot);
     }
   }
 
-
   noLights();
   camera();
   hint(DISABLE_DEPTH_TEST);
-  predators.drawEmos();
+  robots.drawEmos();
 }
 
 public void darkenRobotTracks(Walker bot) {
@@ -107,79 +90,6 @@ public void drawGround() {
   vertex(0, height, 0, 1);
   endShape();
 }
-class AggroKiller extends Killer {
-  float maxSpeed;
-
-  AggroKiller(PVector l) {
-    super(l);
-    hunting = random(50.0f, 72.0f);
-    maxSpeed = random(2.8f, 3.6f);
-    c = color(100, 200, 100);
-    rotationRate = 0.2f;
-  }
-
-  // immahunta
-  public void hunt(int index) {
-    target = preys.particles.get(index).location;
-    speed *= 1.1f;
-    speed = min(speed, random(2.8f, 3.6f));
-    // debug
-    strokeWeight(1);
-    stroke(255, 100);
-    line(location.x, location.y, target.x, target.y);
-  }
-}
-class BombKiller extends Killer {
-  float senseRadius;
-  float bombRadius;
-  int tolerance;
-
-  BombKiller(PVector l) {
-    super(l);
-    speed = 0.3f;
-    senseRadius = random(36.0f, 48.0f);
-    bombRadius = random(36.0f, 48.0f);
-    tolerance = PApplet.parseInt(random(15, 20));
-    c = color(200, 200, 100);
-  }
-
-  public void run() {
-    update();
-    look();
-    display();
-  }
-
-  public void look() {
-    if (location.dist(target) < 10.0f) {
-      philander();
-    }
-
-    int counter = 0;
-    for (int i = preys.particles.size()-1; i >= 0; i--) {
-      Particle prey = preys.particles.get(i);
-      if (location.dist(prey.location) < senseRadius)
-        counter++;
-    }
-
-    if (counter > tolerance)
-      kill();
-  }
-
-  // i dont hunt.
-  // void hunt() {}
-
-  public void kill() {
-    for (int i = preys.particles.size()-1; i >= 0; i--) {
-      Particle prey = preys.particles.get(i);
-      if (location.dist(prey.location) < bombRadius)
-        prey.kill();
-    }
-
-    // debug
-    stroke(0,255,255);
-    ellipse(location.x, location.y, bombRadius, bombRadius);
-  }
-}
 class Emo {
   PImage img;
   PVector pos;
@@ -188,9 +98,23 @@ class Emo {
     load();
     pos = new PVector();
   }  
+
   public void load() {
-    img = loadImage("icon" + nf(1 + PApplet.parseInt(random(21)), 3) + ".png");
+    this.normal();
   }
+
+  public void planter() {
+    img = loadImage("planter" + nf(1 + PApplet.parseInt(random(9)), 3) + ".png");
+  }
+
+  public void normal() {
+    img = loadImage("normal" + nf(1 + PApplet.parseInt(random(6)), 3) + ".png");
+  }
+
+  public void enraged() {
+    img = loadImage("enraged" + nf(1 + PApplet.parseInt(random(6)), 3) + ".png");
+  }
+
   public void setPos(float x, float y) {
     pos.x = x;
     pos.y = y;
@@ -220,7 +144,7 @@ class Killer extends Walker {
 
   public void run() {
     super.run();
-    mood();
+    enrage();
   }
 
   public void look() {
@@ -279,7 +203,14 @@ class Killer extends Walker {
     speed = 5;
   }
 
-  public void mood() {
+  public void emotion() {
+    if (rage < 0.1f)
+      emo.normal();
+    else
+      emo.enraged();
+  }
+
+  public void enrage() {
     if (rage < 0.1f) {
       rage = 0;
       rotationRate = 0.05f;
@@ -619,11 +550,8 @@ class Planter extends Walker {
   }
 
   public void run() {
-    update();
-    look();
-    avoid();
+    super.run();
     layseed();
-    display();
   }
 
   public void layseed() {
@@ -631,17 +559,14 @@ class Planter extends Walker {
       plants.seed_plant(location.x, location.y);
   }
 
-  public void philander() {
-    target.x = random(0, width);
-    target.y = random(0, height);
-    isAvoiding = false;
-    emo.load();
+  public void emotion() {
+    emo.planter();
   }
 }
-class Predators {
+class Robots {
   ArrayList<Walker> particles;
 
-  Predators(int p, int k) {
+  Robots(int p, int k) {
     particles = new ArrayList<Walker>();
     for (int i = 0; i < p; i++) {
       this.addPlanter();
@@ -655,8 +580,31 @@ class Predators {
     for (int i = particles.size()-1; i >= 0; i--) {
       Walker p = particles.get(i);
       p.run();
-      if (p.isDead) {
-        particles.remove(i);
+      if (p.isDead) { particles.remove(i); }
+    }
+    this.collisions();
+  }
+
+  public void collisions() {
+    for (int i = this.particles.size()-1; i >= 0 ; i--) {
+      Walker robot = this.particles.get(i);
+      float avoidance = robot.avoidance;
+
+      for (int j = this.particles.size()-1; j >= 0; j--) {
+        Walker other = robots.particles.get(j);
+        float distance = robot.location.dist(other.location);
+        if (distance < avoidance && distance != 0) {
+
+          // run in the opposite direction
+          PVector opposite = robot.location.get();
+          opposite.sub(other.location);
+          opposite.normalize();
+          opposite.mult(avoidance);
+          opposite.add(robot.location);
+
+          robot.isAvoiding = true;
+          robot.target = opposite;
+        }
       }
     }
   }
@@ -682,28 +630,9 @@ class Predators {
   }
 
   public void drawEmos() {
-    for (int i = predators.particles.size()-1; i >= 0; i--) {
-      predators.particles.get(i).emo.draw();
+    for (int i = this.particles.size()-1; i >= 0; i--) {
+      this.particles.get(i).emo.draw();
     }
-  }
-}
-class Preys extends ParticleSystem {
-  Preys(int num) {
-    super(num);
-  }
-  // roll of the dice for birth
-  public void birth() {
-    if (random(0,1) < 0.05f) {
-      // this.addParticle();
-    }
-  }
-
-  public void addParticle() {
-    // float angle = random(0, 1) * TWO_PI;
-    // float radius = random(0, width/2);
-    // PVector location = new PVector(width/2+sin(angle)*radius, height/2+cos(angle)*radius);
-    // Particle p = new Plant(location);
-    // particles.add(p);
   }
 }
 class Walker extends Particle {
@@ -734,7 +663,7 @@ class Walker extends Particle {
     avoidance = random(30.0f, 40.0f);
 
     emo = new Emo();
-    emo.load();
+    this.emotion();
 
     mode = STILL;
   }
@@ -742,7 +671,6 @@ class Walker extends Particle {
   public void run() {
     update();
     look();
-    avoid();
     display();
   }
 
@@ -781,30 +709,17 @@ class Walker extends Particle {
     }
   }
 
-  public void avoid() {
-    for (int i = predators.particles.size()-1; i >= 0; i--) {
-      Particle other = predators.particles.get(i);
-      float distance = location.dist(other.location);
-      if (distance < avoidance && distance != 0) {
-        isAvoiding = true;
-
-        // run in the opposite direction
-        PVector opposite = location.get();
-        opposite.sub(other.location);
-        opposite.normalize();
-        opposite.mult(avoidance);
-        opposite.add(location);
-        target = opposite;
-      }
-    }
-  }
-
   public void philander() {
     target.x = random(0, width);
     target.y = random(0, height);
     isAvoiding = false;
-    emo.load();
+
+    this.emotion();
     mode = STILL;
+  }
+
+  public void emotion() {
+    emo.load();
   }
 
   public void display() {

@@ -7,11 +7,8 @@ class Planter extends Walker {
   }
 
   void run() {
-    update();
-    look();
-    avoid();
+    super.run();
     layseed();
-    display();
   }
 
   void layseed() {
@@ -19,10 +16,7 @@ class Planter extends Walker {
       plants.seed_plant(location.x, location.y);
   }
 
-  void philander() {
-    target.x = random(0, width);
-    target.y = random(0, height);
-    isAvoiding = false;
-    emo.load();
+  void emotion() {
+    emo.planter();
   }
 }
