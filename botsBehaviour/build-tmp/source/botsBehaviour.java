@@ -67,7 +67,10 @@ public void draw() {
   preys.run();
 
   for (int i = predators.particles.size()-1; i >= 0; i--) {
-    darkenRobotTracks(predators.particles.get(i));
+    Walker bot = predators.particles.get(i);
+    if (bot.mode == Walker.MOVING) {
+      darkenRobotTracks(bot);
+    }
   }
 
 
@@ -373,6 +376,7 @@ class Plant
 { 
 
   float x, y; // positions
+  float px, py; // parent position
   float age; // in seconds
   float size, size_min, size_max;
   float growth_rate;
@@ -382,12 +386,14 @@ class Plant
   int hue, saturation, value;
   boolean isDead;
 
-  public Plant(float x, float y, int hue, int generation)
+  public Plant(float x, float y, float px, float py, int hue, int generation)
   {
     this.x = x;
     this.y = y;
+    this.px = px;
+    this.py = py;    
     this.time_born = millis()/1000.0f;
-    this.age = 0.0f;
+    this.age = 0.0f;  
     this.size_min = 1;
     this.size_max = 30;
     this.growth_rate = 20.0f;
@@ -404,6 +410,7 @@ class Plant
 
   public void draw()
   {
+    
     pushMatrix();
     noStroke();
     lights();
@@ -412,6 +419,11 @@ class Plant
     sphereDetail(10);
     sphere( this.size/2.0f );
     popMatrix();
+    
+    stroke(10,255,128);
+    strokeWeight( this.size/this.size_max * 6.0f);
+    line(this.px, this.py, 0, this.x, this.y, 0);
+    noStroke();
   }
 
   public void update(float dt)
@@ -510,7 +522,7 @@ class Plant3D {
     return sh;
   }
 }
-class PlantGroup {
+  class PlantGroup {
 
   ArrayList<Plant> vegetation;
 
@@ -521,7 +533,7 @@ class PlantGroup {
 
   public void seed_plant(float x, float y)
   {
-    Plant root = new Plant(x, y, PApplet.parseInt(random(80,130)), 0);
+    Plant root = new Plant(x, y, x,y, PApplet.parseInt(random(80,130)), 0);
     root.randomize_growth();
     vegetation.add(root);
   }
@@ -578,7 +590,7 @@ class PlantGroup {
 
           if ( does_not_overlap) 
           {
-            Plant sapling = new Plant(sx, sy, plant.hue, plant.generation+1);
+            Plant sapling = new Plant(sx, sy, plant.x, plant.y, plant.hue, plant.generation+1);
             sapling.randomize_growth();
             vegetation.add(sapling);
           }
@@ -695,10 +707,15 @@ class Preys extends ParticleSystem {
   }
 }
 class Walker extends Particle {
+  public static final int STILL = 0;
+  public static final int MOVING = 1;
+  public static final int ROTATING = 2;
+
   PVector target;
   float sz, dir, speed;
   float rotationRate;
   int c;
+  int mode;
   Emo emo;
 
   // stuff for avoidance
@@ -715,8 +732,11 @@ class Walker extends Particle {
     rotationRate = 0.05f;
     isAvoiding = false;
     avoidance = random(30.0f, 40.0f);
+
     emo = new Emo();
     emo.load();
+
+    mode = STILL;
   }
 
   public void run() {
@@ -738,15 +758,20 @@ class Walker extends Particle {
 
     if (abs(dirDiff) < rotationRate) {
       dir = tdir;
-      if (pDiff.mag() > 5) {
+      if (pDiff.mag() > speed) {
         // move
         pDiff.normalize();
         pDiff.mult(speed);
         location.add(pDiff);
+        mode = MOVING;
+      }
+      else {
+        mode = STILL;
       }
     } else {
       // rotate
       dir += dirDiff > 0 ? rotationRate : -rotationRate;
+      mode = ROTATING;
     }
   }
 
@@ -779,6 +804,7 @@ class Walker extends Particle {
     target.y = random(0, height);
     isAvoiding = false;
     emo.load();
+    mode = STILL;
   }
 
   public void display() {

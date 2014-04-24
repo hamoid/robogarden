@@ -1,8 +1,13 @@
 class Walker extends Particle {
+  public static final int STILL = 0;
+  public static final int MOVING = 1;
+  public static final int ROTATING = 2;
+
   PVector target;
   float sz, dir, speed;
   float rotationRate;
   color c;
+  int mode;
   Emo emo;
 
   // stuff for avoidance
@@ -19,8 +24,11 @@ class Walker extends Particle {
     rotationRate = 0.05;
     isAvoiding = false;
     avoidance = random(30.0, 40.0);
+
     emo = new Emo();
     emo.load();
+
+    mode = STILL;
   }
 
   void run() {
@@ -42,15 +50,20 @@ class Walker extends Particle {
 
     if (abs(dirDiff) < rotationRate) {
       dir = tdir;
-      if (pDiff.mag() > 5) {
+      if (pDiff.mag() > speed) {
         // move
         pDiff.normalize();
         pDiff.mult(speed);
         location.add(pDiff);
+        mode = MOVING;
+      }
+      else {
+        mode = STILL;
       }
     } else {
       // rotate
       dir += dirDiff > 0 ? rotationRate : -rotationRate;
+      mode = ROTATING;
     }
   }
 
@@ -83,6 +96,7 @@ class Walker extends Particle {
     target.y = random(0, height);
     isAvoiding = false;
     emo.load();
+    mode = STILL;
   }
 
   void display() {

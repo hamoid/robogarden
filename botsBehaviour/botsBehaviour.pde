@@ -51,7 +51,10 @@ void draw() {
   preys.run();
 
   for (int i = predators.particles.size()-1; i >= 0; i--) {
-    darkenRobotTracks(predators.particles.get(i));
+    Walker bot = predators.particles.get(i);
+    if (bot.mode == Walker.MOVING) {
+      darkenRobotTracks(bot);
+    }
   }
 
 
