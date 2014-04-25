@@ -1,10 +1,10 @@
 PlantA a, b, c;
 void setup() {
-  size(600, 600, P3D);
+  size(600, 800, P3D);
   colorMode(HSB);
-  a = new PlantA(width*0.3, height);
-  b = new PlantA(width*0.6, height);
-  c = new PlantA(width*0.9, height);
+  a = new PlantA(width*0.25, height*0.9);
+  b = new PlantA(width*0.5, height*0.9);
+  c = new PlantA(width*0.75, height*0.9);
 }
 void draw() {
   background(255);
