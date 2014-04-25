@@ -1,3 +1,9 @@
+/*
+  Currently, the plants get recalculated on each frame, which is not efficient.
+  Split the process in two parts: 
+  1. calculate all the points and store them in an array.
+  2. render part of the points, depending on the age (older = more points)
+*/
 PlantA a, b, c;
 void setup() {
   size(600, 600, P3D);
