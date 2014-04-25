@@ -17,8 +17,9 @@ class Fern extends Plant {
     this.fern_leaves = new ArrayList();
     this.num_leaves = int(random(3, 6));
     this.scale = (4.0+randomGaussian())/5.0 * 6.0;
+    float baseangle = random(0.0,TAU);
     for (int f=0; f<this.num_leaves; f++) {
-      this.fern_leaves.add( new FernLeaf(this.x, this.y, this.scale*(6.0+randomGaussian())/7.0, TAU*float(f)/this.num_leaves, this.hue) );
+      this.fern_leaves.add( new FernLeaf(this.x, this.y, this.scale*(6.0+randomGaussian())/7.0, baseangle + TAU*float(f)/this.num_leaves, this.hue) );
     }
   }    
     
