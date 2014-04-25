@@ -18,7 +18,7 @@ class Fern extends Plant {
     this.num_leaves = int(random(3, 6));
     this.scale = (4.0+randomGaussian())/5.0 * 6.0;
     for (int f=0; f<this.num_leaves; f++) {
-      this.fern_leaves.add( new FernLeaf(this.x, this.y, this.scale*(6.0+randomGaussian())/7.0, TAU*float(f)/this.num_leaves) );
+      this.fern_leaves.add( new FernLeaf(this.x, this.y, this.scale*(6.0+randomGaussian())/7.0, TAU*float(f)/this.num_leaves, this.hue) );
     }
   }    
     
@@ -42,14 +42,16 @@ class FernLeaf {
   float inplane_angle;
   color color_outer, color_inner;
   float theTime;
+  float hue;
 
-  FernLeaf (float x, float y, float scale, float inplane_angle) {
+  FernLeaf (float x, float y, float scale, float inplane_angle, float hue) {
     this.x = x;
     this.y = y;
+    this.hue = hue;
     this.scale = scale;
     this.inplane_angle = inplane_angle;
-    this.color_inner = color(100,255,200);
-    this.color_outer = color(100, 200, 150);
+    this.color_inner = color((hue+30)%255,255,200);
+    this.color_outer = color(hue, 200, 150);
     this.theTime = 0.0;
   }
 
