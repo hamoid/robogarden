@@ -51,10 +51,6 @@ class Plant
     sphere( this.size/2.0 );
     popMatrix();
 
-    stroke(10, 255, 128);
-    strokeWeight( this.size/this.size_max * 6.0);
-    line(this.px, this.py, 0, this.x, this.y, 0);
-    noStroke();
   }
 
   void update(float dt)

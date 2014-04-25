@@ -15,6 +15,9 @@ class PlantGroup {
     case 1:
       root = new PlantA(x, y, x, y, int(random(80, 130)), 0);
       break;
+    case 2:
+      root = new Fern(x, y, x, y, int(random(80, 130)), 0);      
+      break;
     default:
       root = new Plant(x, y, x, y, int(random(80, 130)), 0);
     }

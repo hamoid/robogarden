@@ -13,7 +13,7 @@ class Planter extends Walker {
 
   void layseed() {
     if (random(0, 1) < 0.02)
-      plants.seed_plant(location.x, location.y, int(random(2)));
+      plants.seed_plant(location.x, location.y, int(random(3)));
   }
 
   void emotion() {
