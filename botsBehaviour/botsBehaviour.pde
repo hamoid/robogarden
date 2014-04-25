@@ -43,7 +43,7 @@ void draw() {
   drawGround();
 
   // predators.birth();
-  plants.update();
+  plants.update(this);
   plants.draw();
 
   preys.birth();

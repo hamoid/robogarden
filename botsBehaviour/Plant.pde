@@ -12,6 +12,11 @@ class Plant
   int hue, saturation, value;
   boolean isDead;
 
+  // copy constructor increments generation
+  public Plant(Plant src) {
+    this(src.x, src.y, src.px, src.py, src.hue, src.generation + 1);
+  }
+
   public Plant(float x, float y, float px, float py, int hue, int generation)
   {
     this.x = x;
@@ -34,23 +39,19 @@ class Plant
     isDead = false;
   }
 
-  public Plant() {
-    this(0., 0., 0., 0., 0, 0);
-  }
-
   void draw()
   {
-    
+
     pushMatrix();
     noStroke();
     lights();
-      fill(this.hue, this.value, this.saturation);
+    fill(this.hue, this.value, this.saturation);
     translate(this.x, this.y, 0);
     sphereDetail(10);
     sphere( this.size/2.0 );
     popMatrix();
-    
-    stroke(10,255,128);
+
+    stroke(10, 255, 128);
     strokeWeight( this.size/this.size_max * 6.0);
     line(this.px, this.py, 0, this.x, this.y, 0);
     noStroke();
@@ -87,31 +88,6 @@ class Plant
     {
       this.can_spawn = false;
     }
-  }
-
-  void copyProperties(Plant p) {
-    p.x = x;
-    p.y = y;
-    p.px = px;
-    p.py = py;    
-    p.time_born = millis()/1000.0;
-    p.age = 0.0;  
-    p.size_min = 1;
-    p.size_max = 30;
-    p.growth_rate = 20.0;
-    p.size = size_min;
-    p.fully_grown = false;
-    p.can_spawn = true;
-    p.generation = generation;
-    p.saturation = 200;
-    p.hue = hue;
-    p.value = 255;    
-  }
-
-  Plant clone() {
-    Plant n = new Plant();
-    copyProperties(n);
-    return n;
   }
 
   void kill() {

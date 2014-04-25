@@ -1,9 +1,10 @@
 class PlantA extends Plant {
 
-  PlantA() {
-    this(0, 0, 0, 0, 0, 0);
+  // Copy constructor increments generation
+  public PlantA (PlantA src) {
+    super(src.x, src.y, src.px, src.py, src.hue, src.generation + 1);
   }
-  PlantA (float x, float y, float px, float py, int hue, int generation) {
+  public PlantA (float x, float y, float px, float py, int hue, int generation) {
     super(x, y, px, py, hue, generation);
   }
   void draw() {
@@ -21,11 +22,6 @@ class PlantA extends Plant {
     //strokeWeight( this.size/this.size_max * 6.0);
     //line(this.px, this.py, 0, this.x, this.y, 0);
     ///noStroke();
-  }
-  Plant clone() {
-    Plant n = new PlantA();
-    copyProperties(n);
-    return n;
   }
 }
 
