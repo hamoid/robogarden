@@ -1,4 +1,5 @@
-  class PlantGroup {
+
+class PlantGroup {
 
   ArrayList<Plant> vegetation;
 
@@ -7,13 +8,20 @@
     vegetation = new ArrayList<Plant>();
   }
 
-  void seed_plant(float x, float y)
+  void seed_plant(float x, float y, int type)
   {
-    Plant root = new Plant(x, y, x,y, int(random(80,130)), 0);
+    Plant root;
+    switch(type) {
+    case 1:
+      root = new PlantA(x, y, x, y, int(random(80, 130)), 0);
+      break;
+    default:
+      root = new Plant(x, y, x, y, int(random(80, 130)), 0);
+    }
     root.randomize_growth();
     vegetation.add(root);
   }
-  
+
   void draw()
   {
     for (int p=0; p<vegetation.size(); p++)
@@ -23,7 +31,7 @@
     }
   }
 
-  void update()
+  void update(Object parent)
   {
     // yang: iterating backwards so we can kill plants
     for (int p = vegetation.size()-1; p >= 0; p--) {
@@ -66,7 +74,24 @@
 
           if ( does_not_overlap) 
           {
-            Plant sapling = new Plant(sx, sy, plant.x, plant.y, plant.hue, plant.generation+1);
+            Plant sapling = null;
+            try {
+              // We want to clone a plant of unknown kind so we find its class and its constructor.
+              // This is very tricky, because you have to specify the arguments for the constructor
+              // and there's a bit of magic involved. Apparently Processing changes the signature
+              // of your functions, and adds the sketch as first argument. You can use
+              // getDeclaredConstructors() to find out about that. Then, you must call newInstance
+              // with the main sketch as first argument, so I do update(this) from botsBehaviour.
+              // Look at the next line. Isn't Java beautiful and straightforward? :)
+              sapling = plant.getClass().getDeclaredConstructor(new Class[] { parent.getClass(), plant.getClass()}).newInstance(parent, plant);
+            } catch(Exception e) {
+              println(e);
+            }
+            sapling.x = sx;
+            sapling.y = sy;
+            sapling.px = plant.x;
+            sapling.py = plant.y;
+            sapling.hue = plant.hue;
             sapling.randomize_growth();
             vegetation.add(sapling);
           }

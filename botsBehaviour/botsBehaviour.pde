@@ -33,7 +33,7 @@ void draw() {
   noStroke();
   drawGround();
 
-  plants.update();
+  plants.update(this);
   plants.draw();
 
   robots.run();
