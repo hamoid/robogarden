@@ -1,13 +1,14 @@
 robogarden
 ==========
 
-Creative Code Jam project
+### Creative Code Jam project
+
+[With a web page too!](http://hamoid.github.io/robogarden) (First attempt at gh-pages)
 
 With robots, and gardening.
 
-robotTest/ includes just one robot, and moves only when pressing the space bar.
-
-botsBehaviour/ includes autonomous planter and cutter robots.
+- robotTest/ includes just one robot, and moves only when pressing the space bar.
+- botsBehaviour/ includes autonomous planter and cutter robots.
 
 To implement:
 - Robots should leave two tracks, one per wheel.
