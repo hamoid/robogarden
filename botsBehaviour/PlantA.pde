@@ -22,7 +22,7 @@ class PlantA extends Plant {
     pushMatrix();
     translate(x, y);
     rotateX(-PI/2.0);
-    scale(0.2);
+    scale(0.006*this.size_max);
     
     for(int i=0; i<leaves.length; i++) {
       leaves[i].draw(int(this.age*5.0));
